@@ -2,4 +2,5 @@ export { AppText, type AppTextProps, type AppTextTone, type AppTextVariant } fro
 export { Badge, type BadgeProps, type BadgeVariant } from './badge';
 export { Button, type ButtonProps, type ButtonSize, type ButtonVariant } from './button';
 export { Card, type CardPadding, type CardProps, type CardVariant } from './card';
+export { LogoImage, type LogoImageProps } from './logo-image';
 export { TextField, type TextFieldProps } from './text-field';

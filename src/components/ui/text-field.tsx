@@ -49,8 +49,14 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
           placeholderTextColor={colors.text.muted}
           ref={ref}
           style={[
-            textStyles.bodySmall,
-            { color: colors.text.primary, flex: 1, paddingVertical: 10, textAlignVertical: props.multiline ? 'top' : 'center' },
+            {
+              color: colors.text.primary,
+              flex: 1,
+              fontFamily: textStyles.bodySmall.fontFamily,
+              fontSize: textStyles.bodySmall.fontSize,
+              paddingVertical: props.multiline ? spacing.md : 0,
+              textAlignVertical: props.multiline ? 'top' : 'center',
+            },
             style,
           ]}
         />
