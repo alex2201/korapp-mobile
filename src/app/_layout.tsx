@@ -23,7 +23,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 
-import { useAuth } from '@/features/auth/auth-provider';
+import { useAuth } from '@/features/auth/auth-store';
 import { AppSplashScreen } from '@/features/splash/splash-screen';
 import { AppProviders } from '@/providers/app-providers';
 import { colors } from '@/theme';
@@ -63,9 +63,10 @@ type AppContentProps = {
 };
 
 function AppContent({ fontsReady }: AppContentProps) {
-  const { token } = useAuth();
+  const sessionStatus = useAuth((state) => state.session.status);
   const [isTestDelayComplete, setIsTestDelayComplete] = useState(false);
-  const isAppReady = fontsReady && token !== undefined && isTestDelayComplete;
+  const isAppReady =
+    fontsReady && sessionStatus === 'ready' && isTestDelayComplete;
 
   useEffect(() => {
     void SplashScreen.hideAsync();
@@ -92,7 +93,9 @@ function AppContent({ fontsReady }: AppContentProps) {
 }
 
 function RootNavigator() {
-  const { token } = useAuth();
+  const session = useAuth((state) => state.session);
+  const isAuthenticated = session.status === 'ready' && Boolean(session.user);
+  const isUnauthenticated = session.status === 'ready' && !session.user;
 
   return (
     <Stack
@@ -102,10 +105,10 @@ function RootNavigator() {
       }}
     >
       <Stack.Screen name="index" />
-      <Stack.Protected guard={Boolean(token)}>
+      <Stack.Protected guard={isAuthenticated}>
         <Stack.Screen name="dashboard/index" />
       </Stack.Protected>
-      <Stack.Protected guard={token !== undefined && token === null}>
+      <Stack.Protected guard={isUnauthenticated}>
         <Stack.Screen name="login/index" />
       </Stack.Protected>
     </Stack>

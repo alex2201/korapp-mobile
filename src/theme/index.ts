@@ -18,6 +18,7 @@ export const spacing = {
   xl: 20,
   '2xl': 24,
   '3xl': 32,
+  '4xl': 48,
 } as const;
 
 export const shadows = {

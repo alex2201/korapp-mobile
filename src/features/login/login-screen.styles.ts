@@ -1,3 +1,4 @@
+import { spacing } from '@/theme';
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
@@ -13,13 +14,13 @@ export const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingHorizontal: 48,
-    paddingVertical: 32,
+    paddingHorizontal: spacing['4xl'],
+    paddingVertical: spacing['4xl'],
   },
   container: {
     alignItems: 'center',
     alignSelf: 'center',
-    gap: 24,
+    gap: spacing['2xl'],
     maxWidth: 420,
     width: '100%',
   },
@@ -28,13 +29,10 @@ export const styles = StyleSheet.create({
     width: '75%',
   },
   loginCard: {
-    gap: 16,
+    gap: spacing['2xl'],
     width: '100%',
   },
   cardHeader: {
-    gap: 8,
-  },
-  form: {
-    gap: 16,
+    gap: spacing.lg,
   },
 });

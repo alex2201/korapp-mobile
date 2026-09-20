@@ -1,7 +1,11 @@
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, useEffect } from 'react';
 
-import { AuthProvider } from '@/features/auth/auth-provider';
+import { useAuthStore } from '@/features/auth/auth-store';
 
 export function AppProviders({ children }: PropsWithChildren) {
-  return <AuthProvider>{children}</AuthProvider>;
+  const initializeAuth = useAuthStore((state) => state.initializeAuth);
+
+  useEffect(() => initializeAuth(), [initializeAuth]);
+
+  return children;
 }

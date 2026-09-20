@@ -1,17 +1,27 @@
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import { Keyboard, KeyboardAvoidingView, ScrollView, View } from 'react-native';
+import { KeyboardAvoidingView, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppText, Button, Card, LogoImage, TextField } from '@/components/ui';
+import { AppText, Card, LogoImage } from '@/components/ui';
 
 import { DottedBackground } from './components/dotted-background';
+import { LoginForm } from './components/login-form';
+import { ResetPasswordConfirmation } from './components/reset-password-confirmation';
+import { ResetPasswordForm } from './components/reset-password-form';
 import { styles } from './login-screen.styles';
 
+type LoginFlowState =
+  | { view: 'login' }
+  | { view: 'resetPassword'; email: string }
+  | { view: 'resetPasswordConfirmation'; email: string };
+
 export function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const canSubmit = email.trim().length > 0 && password.length > 0;
+  const [flow, setFlow] = useState<LoginFlowState>({ view: 'login' });
+
+  function showResetPasswordForm(email: string) {
+    setFlow({ view: 'resetPassword', email });
+  }
 
   return (
     <View style={styles.screen}>
@@ -31,46 +41,35 @@ export function LoginScreen() {
               <LogoImage style={styles.logoImg} />
 
               <Card padding="lg" style={styles.loginCard}>
-                <View style={styles.cardHeader}>
-                  <AppText variant="heading">Bienvenido</AppText>
-                  <AppText tone="secondary" variant="bodySmall">
-                    Ingresa tus credenciales para continuar
-                  </AppText>
-                </View>
+                {flow.view === 'resetPassword' && (
+                  <ResetPasswordForm
+                    initialEmail={flow.email}
+                    onBackToLogin={() => setFlow({ view: 'login' })}
+                    onSuccess={(email) =>
+                      setFlow({ view: 'resetPasswordConfirmation', email })
+                    }
+                  />
+                )}
 
-                <View style={styles.form}>
-                  <TextField
-                    autoCapitalize="none"
-                    autoComplete="email"
-                    keyboardType="email-address"
-                    label="Correo electrónico"
-                    onChangeText={setEmail}
-                    placeholder="tu@farmacia.com"
-                    returnKeyType="next"
-                    textContentType="emailAddress"
-                    value={email}
+                {flow.view === 'resetPasswordConfirmation' && (
+                  <ResetPasswordConfirmation
+                    email={flow.email}
+                    onBackToLogin={() => setFlow({ view: 'login' })}
                   />
-                  <TextField
-                    autoCapitalize="none"
-                    autoComplete="current-password"
-                    label="Contraseña"
-                    onChangeText={setPassword}
-                    onSubmitEditing={canSubmit ? Keyboard.dismiss : undefined}
-                    placeholder="••••••••"
-                    returnKeyType="done"
-                    secureTextEntry
-                    textContentType="password"
-                    value={password}
-                  />
-                  <Button
-                    disabled={!canSubmit}
-                    fullWidth
-                    onPress={Keyboard.dismiss}
-                    size="lg"
-                  >
-                    Iniciar sesión
-                  </Button>
-                </View>
+                )}
+
+                {flow.view === 'login' && (
+                  <>
+                    <View style={styles.cardHeader}>
+                      <AppText variant="heading">Bienvenido</AppText>
+                      <AppText tone="secondary" variant="bodySmall">
+                        Ingresa tus credenciales para continuar
+                      </AppText>
+                    </View>
+
+                    <LoginForm onForgotPassword={showResetPasswordForm} />
+                  </>
+                )}
               </Card>
             </View>
           </ScrollView>
