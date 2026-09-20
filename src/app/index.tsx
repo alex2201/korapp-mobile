@@ -10,5 +10,5 @@ export default function IndexRoute() {
     return <AppSplashScreen />;
   }
 
-  return <Redirect href={session.user ? '/dashboard' : '/login'} />;
+  return <Redirect href={session.user ? '/sale' : '/login'} />;
 }

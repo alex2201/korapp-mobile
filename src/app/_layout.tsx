@@ -106,7 +106,7 @@ function RootNavigator() {
     >
       <Stack.Screen name="index" />
       <Stack.Protected guard={isAuthenticated}>
-        <Stack.Screen name="dashboard/index" />
+        <Stack.Screen name="(tabs)" />
       </Stack.Protected>
       <Stack.Protected guard={isUnauthenticated}>
         <Stack.Screen name="login/index" />
