@@ -1,8 +1,8 @@
-import { signInToFirebaseWithEmailAndPassword } from '@/features/auth/firebase-auth';
+import { validateEmail, validatePassword } from '@/features/auth/auth-validation';
 import { getFirebaseAuthErrorCode } from '@/features/auth/firebase-auth-errors';
+import { signInToFirebaseWithEmailAndPassword } from '@/features/auth/firebase-auth';
 import { useFormSubmission } from '@/features/auth/hooks/use-form-submission';
 import { useValidatedField } from '@/features/auth/hooks/use-validated-field';
-import { validateEmail, validatePassword } from '@/features/auth/auth-validation';
 
 function getLoginErrorMessage(error: unknown) {
   switch (getFirebaseAuthErrorCode(error)) {

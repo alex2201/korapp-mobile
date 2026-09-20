@@ -2,7 +2,7 @@ import { Keyboard, View } from 'react-native';
 
 import { AppText, Button, TextField } from '@/components/ui';
 import { spacing } from '@/theme';
-import { useResetPassword } from '../hooks/useResetPassword';
+import { useResetPassword } from '../hooks/use-reset-password';
 
 interface ResetPasswordFormProps {
   initialEmail: string;

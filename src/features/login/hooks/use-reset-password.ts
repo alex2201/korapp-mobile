@@ -1,8 +1,8 @@
-import { resetPasswordWithEmail } from '@/features/auth/firebase-auth';
+import { validateEmail } from '@/features/auth/auth-validation';
 import { getFirebaseAuthErrorCode } from '@/features/auth/firebase-auth-errors';
+import { resetPasswordWithEmail } from '@/features/auth/firebase-auth';
 import { useFormSubmission } from '@/features/auth/hooks/use-form-submission';
 import { useValidatedField } from '@/features/auth/hooks/use-validated-field';
-import { validateEmail } from '@/features/auth/auth-validation';
 
 function getResetPasswordErrorMessage(error: unknown) {
   switch (getFirebaseAuthErrorCode(error)) {
