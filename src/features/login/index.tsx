@@ -9,7 +9,7 @@ import { DottedBackground } from './components/dotted-background';
 import { LoginForm } from './components/login-form';
 import { ResetPasswordConfirmation } from './components/reset-password-confirmation';
 import { ResetPasswordForm } from './components/reset-password-form';
-import { styles } from './login-screen.styles';
+import { styles } from './styles/login-screen.styles';
 
 type LoginFlowState =
   | { view: 'login' }
@@ -40,7 +40,7 @@ export function LoginScreen() {
             <View style={styles.container}>
               <LogoImage style={styles.logoImg} />
 
-              <Card padding="lg" style={styles.loginCard}>
+              <Card padding="md" style={styles.loginCard}>
                 {flow.view === 'resetPassword' && (
                   <ResetPasswordForm
                     initialEmail={flow.email}

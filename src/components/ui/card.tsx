@@ -10,7 +10,7 @@ export interface CardProps extends ViewProps {
   variant?: CardVariant;
 }
 
-const paddings = { none: 0, sm: spacing.md, md: spacing.lg, lg: spacing.xl } as const;
+const paddings = { none: 0, sm: spacing['2xl'], md: spacing['3xl'], lg: spacing['4xl'] } as const;
 
 export function Card({ children, padding = 'md', style, variant = 'default', ...props }: CardProps) {
   return (
