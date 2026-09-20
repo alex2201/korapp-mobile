@@ -1,18 +1,11 @@
-import { useReducer, type Dispatch } from 'react';
-
 import { signInToFirebaseWithEmailAndPassword } from '@/features/auth/firebase-auth';
+import { getFirebaseAuthErrorCode } from '@/features/auth/firebase-auth-errors';
+import { useFormSubmission } from '@/features/auth/hooks/use-form-submission';
+import { useValidatedField } from '@/features/auth/hooks/use-validated-field';
 import { validateEmail, validatePassword } from '@/features/auth/auth-validation';
 
 function getLoginErrorMessage(error: unknown) {
-  const code =
-    typeof error === 'object' &&
-    error !== null &&
-    'code' in error &&
-    typeof error.code === 'string'
-      ? error.code
-      : undefined;
-
-  switch (code) {
+  switch (getFirebaseAuthErrorCode(error)) {
     case 'auth/invalid-credential':
       return 'Correo o contraseña incorrectos';
     case 'auth/user-disabled':
@@ -24,118 +17,69 @@ function getLoginErrorMessage(error: unknown) {
   }
 }
 
-interface LoginState {
-  email: string;
-  emailTouched: boolean;
-  isSubmitting: boolean;
-  loginError?: string;
-  password: string;
-  passwordTouched: boolean;
-}
-
-type LoginAction =
-  | { type: 'emailChanged'; value: string }
-  | { type: 'passwordChanged'; value: string }
-  | { type: 'emailTouched' }
-  | { type: 'passwordTouched' }
-  | { type: 'submissionAttempted' }
-  | { type: 'loginStarted' }
-  | { type: 'loginFailed'; error: string }
-  | { type: 'loginFinished' };
-
-const initialState: LoginState = {
-  email: '',
-  emailTouched: false,
-  isSubmitting: false,
-  password: '',
-  passwordTouched: false,
-};
-
-function loginReducer(state: LoginState, action: LoginAction): LoginState {
-  switch (action.type) {
-    case 'emailChanged':
-      return { ...state, email: action.value, loginError: undefined };
-    case 'passwordChanged':
-      return { ...state, loginError: undefined, password: action.value };
-    case 'emailTouched':
-      return { ...state, emailTouched: true };
-    case 'passwordTouched':
-      return { ...state, passwordTouched: true };
-    case 'submissionAttempted':
-      return { ...state, emailTouched: true, passwordTouched: true };
-    case 'loginStarted':
-      return { ...state, isSubmitting: true, loginError: undefined };
-    case 'loginFailed':
-      return { ...state, loginError: action.error };
-    case 'loginFinished':
-      return { ...state, isSubmitting: false };
-  }
-}
-
 interface CreateLoginActionsParams {
   canSubmit: boolean;
-  dispatch: Dispatch<LoginAction>;
-  state: LoginState;
+  email: ReturnType<typeof useValidatedField>;
+  password: ReturnType<typeof useValidatedField>;
+  submission: ReturnType<typeof useFormSubmission>;
 }
 
 function createLoginActions({
   canSubmit,
-  dispatch,
-  state,
+  email,
+  password,
+  submission,
 }: CreateLoginActionsParams) {
   function setEmail(value: string) {
-    dispatch({ type: 'emailChanged', value });
+    email.setValue(value);
+    submission.clearError();
   }
 
   function setPassword(value: string) {
-    dispatch({ type: 'passwordChanged', value });
+    password.setValue(value);
+    submission.clearError();
   }
 
   async function login() {
-    dispatch({ type: 'submissionAttempted' });
+    email.markAsTouched();
+    password.markAsTouched();
 
     if (!canSubmit) return;
 
-    dispatch({ type: 'loginStarted' });
+    submission.start();
 
     try {
       await signInToFirebaseWithEmailAndPassword(
-        state.email.trim().toLowerCase(),
-        state.password,
+        email.value.trim().toLowerCase(),
+        password.value,
       );
     } catch (error) {
-      dispatch({ type: 'loginFailed', error: getLoginErrorMessage(error) });
+      submission.fail(getLoginErrorMessage(error));
     } finally {
-      dispatch({ type: 'loginFinished' });
+      submission.finish();
     }
   }
 
-  return {
-    login,
-    markEmailAsTouched: () => dispatch({ type: 'emailTouched' }),
-    markPasswordAsTouched: () => dispatch({ type: 'passwordTouched' }),
-    setEmail,
-    setPassword,
-  };
+  return { login, setEmail, setPassword };
 }
 
 export function useLogin() {
-  const [state, dispatch] = useReducer(loginReducer, initialState);
-
-  const emailValidationError = validateEmail(state.email);
-  const passwordValidationError = validatePassword(state.password);
-  const canSubmit =
-    !emailValidationError && !passwordValidationError && !state.isSubmitting;
-  const actions = createLoginActions({ canSubmit, dispatch, state });
+  const email = useValidatedField('', validateEmail);
+  const password = useValidatedField('', validatePassword);
+  const submission = useFormSubmission();
+  const canSubmit = email.isValid && password.isValid && !submission.isSubmitting;
+  const actions = createLoginActions({ canSubmit, email, password, submission });
 
   return {
     canSubmit,
-    email: state.email,
-    emailError: state.emailTouched ? emailValidationError : undefined,
-    isSubmitting: state.isSubmitting,
-    loginError: state.loginError,
-    password: state.password,
-    passwordError: state.passwordTouched ? passwordValidationError : undefined,
+    email: email.value,
+    emailError: email.error,
+    isSubmitting: submission.isSubmitting,
+    loginError: submission.error,
+    markEmailAsTouched: email.markAsTouched,
+    markPasswordAsTouched: password.markAsTouched,
+    password: password.value,
+    passwordError: password.error,
     ...actions,
   };
 }
