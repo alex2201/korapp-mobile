@@ -1,11 +1,10 @@
-import type { User } from '@react-native-firebase/auth';
-
 import { useAuthStore } from './auth-store';
+import type { Account } from './auth-types';
 
-export function useAuthenticatedUser(): User {
+export function useAuthenticatedUser(): Account {
   const session = useAuthStore((state) => state.session);
 
-  if (session.status !== 'ready' || !session.user) {
+  if (session.status !== 'authenticated') {
     throw new Error(
       'useAuthenticatedUser must be used within an authenticated route',
     );

@@ -23,7 +23,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 
-import { useAuth } from '@/features/auth/auth-store';
+import { useAuthStore } from '@/features/auth/auth-store';
 import { AppSplashScreen } from '@/features/splash/splash-screen';
 import { AppProviders } from '@/providers/app-providers';
 import { colors } from '@/theme';
@@ -63,10 +63,10 @@ type AppContentProps = {
 };
 
 function AppContent({ fontsReady }: AppContentProps) {
-  const sessionStatus = useAuth((state) => state.session.status);
+  const sessionStatus = useAuthStore((state) => state.session.status);
   const [isTestDelayComplete, setIsTestDelayComplete] = useState(false);
   const isAppReady =
-    fontsReady && sessionStatus === 'ready' && isTestDelayComplete;
+    fontsReady && sessionStatus !== 'initializing' && isTestDelayComplete;
 
   useEffect(() => {
     void SplashScreen.hideAsync();
@@ -93,9 +93,9 @@ function AppContent({ fontsReady }: AppContentProps) {
 }
 
 function RootNavigator() {
-  const session = useAuth((state) => state.session);
-  const isAuthenticated = session.status === 'ready' && Boolean(session.user);
-  const isUnauthenticated = session.status === 'ready' && !session.user;
+  const session = useAuthStore((state) => state.session);
+  const isAuthenticated = session.status === 'authenticated';
+  const isUnauthenticated = session.status === 'unauthenticated';
 
   return (
     <Stack
