@@ -5,7 +5,7 @@ import { colors } from '@/theme';
 export default function TabsLayout() {
   return (
     <NativeTabs tintColor={colors.brand.primary}>
-      <NativeTabs.Trigger name="sale">
+      <NativeTabs.Trigger name="sale" disableAutomaticContentInsets>
         <NativeTabs.Trigger.Icon
           sf={{ default: 'cart', selected: 'cart.fill' }}
           md={{ default: 'shopping_cart', selected: 'shopping_cart' }}
