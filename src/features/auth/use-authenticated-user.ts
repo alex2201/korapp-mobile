@@ -1,7 +1,7 @@
 import { useAuthStore } from './auth-store';
-import type { Account } from './auth-types';
+import type { AuthenticatedUser } from './auth-types';
 
-export function useAuthenticatedUser(): Account {
+export function useAuthenticatedUser(): AuthenticatedUser {
   const session = useAuthStore((state) => state.session);
 
   if (session.status !== 'authenticated') {

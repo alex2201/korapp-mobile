@@ -1,14 +1,14 @@
 import { korappHttpClient } from '@/infrastructure/http/korapp-http-client';
 
 import {
-  verifyTokenResponseSchema,
-  type VerifyTokenData,
-} from './auth-types';
+  verifyTokenResponseDtoSchema,
+  type VerifyTokenDataDto,
+} from './auth-dtos';
 
-export async function verifyFirebaseToken(): Promise<VerifyTokenData> {
+export async function verifyFirebaseToken(): Promise<VerifyTokenDataDto> {
   const response = await korappHttpClient.post(
     '/auth/verify-token',
-    verifyTokenResponseSchema,
+    verifyTokenResponseDtoSchema,
   );
 
   return response.data;

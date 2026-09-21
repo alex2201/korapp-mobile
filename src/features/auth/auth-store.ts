@@ -2,7 +2,8 @@ import type { User } from '@react-native-firebase/auth';
 import { create } from 'zustand';
 
 import { verifyFirebaseToken } from './auth-api';
-import type { Account } from './auth-types';
+import { mapVerifyTokenDtoToAuthenticatedUser } from './auth-mappers';
+import type { AuthenticatedUser } from './auth-types';
 import {
   observeFirebaseAuthState,
   signOutFromFirebase,
@@ -19,7 +20,7 @@ export type AuthSession =
     }
   | {
       status: 'authenticated';
-      user: Account;
+      user: AuthenticatedUser;
     };
 
 type AuthState = {
@@ -46,11 +47,7 @@ async function resolveFirebaseUser(
 
   try {
     const data = await verifyFirebaseToken();
-    const user: Account = {
-      ...data.user,
-      roles: data.roles,
-      permissions: data.permissions,
-    };
+    const user = mapVerifyTokenDtoToAuthenticatedUser(data);
 
     if (isCurrent()) {
       setSession({ status: 'authenticated', user });
