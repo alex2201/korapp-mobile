@@ -25,6 +25,14 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permite que $(PRODUCT_NAME) use la cámara para escanear códigos de barras.",
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": true
+        }
+      ],
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
       [

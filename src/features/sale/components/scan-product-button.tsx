@@ -1,4 +1,4 @@
-import { Alert, Pressable } from 'react-native';
+import { Pressable } from 'react-native';
 
 import { AppText } from '@/components/ui';
 import { colors } from '@/theme';
@@ -6,16 +6,16 @@ import { colors } from '@/theme';
 import { BarcodeIcon } from './barcode-icon';
 import { styles } from './scan-product-button.styles';
 
-export function ScanProductButton() {
-  function handlePress() {
-    Alert.alert('Escanear producto', 'El escáner se implementará próximamente.');
-  }
+type ScanProductButtonProps = {
+  onPress: () => void;
+};
 
+export function ScanProductButton({ onPress }: ScanProductButtonProps) {
   return (
     <Pressable
       accessibilityLabel="Escanear producto"
       accessibilityRole="button"
-      onPress={handlePress}
+      onPress={onPress}
       style={({ pressed }) => [styles.button, pressed ? styles.pressed : null]}
     >
       <BarcodeIcon color={colors.text.inverse} />

@@ -21,4 +21,31 @@ export const pharmacyResponseDtoSchema = z.object({
   timestamp: z.iso.datetime(),
 });
 
+export const productDtoSchema = z.object({
+  id: z.number().int().positive(),
+  publicId: z.string().min(1),
+  name: z.string().min(1),
+  genericName: z.string().nullable(),
+  unit: z.string().min(1),
+  barcode: z.string().nullable(),
+  currentPrice: z.string().nullable(),
+  currentStock: z.number(),
+  requiresPrescription: z.boolean(),
+});
+
+export const productBarcodeSearchResultDtoSchema = productDtoSchema.extend({
+  bestBatchId: z.number().int().positive().nullable(),
+});
+
+export const productBarcodeSearchResponseDtoSchema = z.object({
+  success: z.boolean(),
+  data: productBarcodeSearchResultDtoSchema,
+  message: z.string().optional(),
+  timestamp: z.iso.datetime(),
+});
+
 export type PharmacyDto = z.infer<typeof pharmacyDtoSchema>;
+export type ProductDto = z.infer<typeof productDtoSchema>;
+export type ProductBarcodeSearchResultDto = z.infer<
+  typeof productBarcodeSearchResultDtoSchema
+>;

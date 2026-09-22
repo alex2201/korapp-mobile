@@ -44,11 +44,22 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       ...config.ios,
       bundleIdentifier: variant.iosBundleIdentifier,
       googleServicesFile: `${variant.firebaseDirectory}/GoogleService-Info.plist`,
+      infoPlist: {
+        ...config.ios?.infoPlist,
+        NSCameraUsageDescription:
+          'Korapp usa la cámara para escanear códigos de barras de productos.',
+      },
     },
     android: {
       ...config.android,
       package: variant.androidPackage,
       googleServicesFile: `${variant.firebaseDirectory}/google-services.json`,
+      permissions: Array.from(
+        new Set([
+          ...(config.android?.permissions ?? []),
+          'android.permission.CAMERA',
+        ]),
+      ),
     },
     extra: {
       ...config.extra,

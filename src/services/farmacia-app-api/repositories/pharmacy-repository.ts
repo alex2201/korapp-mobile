@@ -1,7 +1,13 @@
 import { korappHttpClient } from '@/infrastructure/http/korapp-http-client';
 
-import { pharmacyResponseDtoSchema } from '../dtos/pharmacy-dtos';
-import { mapPharmacyDto } from '../mappers/pharmacy-mappers';
+import {
+  pharmacyResponseDtoSchema,
+  productBarcodeSearchResponseDtoSchema,
+} from '../dtos/pharmacy-dtos';
+import {
+  mapPharmacyDto,
+  mapProductBarcodeSearchResultDto,
+} from '../mappers/pharmacy-mappers';
 
 export const pharmacyRepository = {
   async getInfo() {
@@ -11,5 +17,15 @@ export const pharmacyRepository = {
     );
 
     return mapPharmacyDto(response.data);
+  },
+
+  async searchProductByBarcode(barcode: string) {
+    const query = new URLSearchParams({ barcode });
+    const response = await korappHttpClient.get(
+      `/pharmacy/products/barcode?${query.toString()}`,
+      productBarcodeSearchResponseDtoSchema,
+    );
+
+    return mapProductBarcodeSearchResultDto(response.data);
   },
 };

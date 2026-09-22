@@ -1,6 +1,13 @@
 import { Pharmacy } from '@/domain/models/pharmacy';
+import type {
+  Product,
+  ProductBarcodeSearchResult,
+} from '@/domain/models/product';
 
-import type { PharmacyDto } from '../dtos/pharmacy-dtos';
+import type {
+  PharmacyDto,
+  ProductBarcodeSearchResultDto,
+} from '../dtos/pharmacy-dtos';
 
 function mapSettings(settings: unknown): Record<string, unknown> {
   if (!settings) return {};
@@ -26,4 +33,25 @@ export function mapPharmacyDto(dto: PharmacyDto): Pharmacy {
     ...dto,
     settings: mapSettings(dto.settings),
   });
+}
+
+export function mapProductBarcodeSearchResultDto(
+  dto: ProductBarcodeSearchResultDto,
+): ProductBarcodeSearchResult {
+  const product: Product = {
+    id: dto.id,
+    publicId: dto.publicId,
+    name: dto.name,
+    genericName: dto.genericName,
+    unit: dto.unit,
+    barcode: dto.barcode,
+    currentPrice: dto.currentPrice,
+    currentStock: dto.currentStock,
+    requiresPrescription: dto.requiresPrescription,
+  };
+
+  return {
+    ...product,
+    bestBatchId: dto.bestBatchId,
+  };
 }
