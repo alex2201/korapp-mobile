@@ -10,9 +10,17 @@ export const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  mainContent: {
+    flex: 1,
+    paddingHorizontal: spacing['3xl'],
+    paddingTop: spacing.md,
+    width: '100%',
+    gap: spacing.md
+  },
   content: {
-    backgroundColor: colors.background.default,
     flexGrow: 1,
+    alignItems: 'flex-start',
+    width: '100%',
   },
   scrollViewContainer: {
     alignItems: 'center',

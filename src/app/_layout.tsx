@@ -23,9 +23,12 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 
-import { useAuthStore } from '@/features/auth/auth-store';
+import { PharmacyHeaderTitle } from '@/components/navigation/pharmacy-header-title';
+import { Pharmacy } from '@/domain/models/pharmacy';
 import { AppSplashScreen } from '@/features/splash/splash-screen';
 import { AppProviders } from '@/providers/app-providers';
+import { useAuthStore } from '@/stores/auth-store';
+import { usePharmacyStore } from '@/stores/pharmacy-store';
 import { colors } from '@/theme';
 
 void SplashScreen.preventAutoHideAsync();
@@ -86,7 +89,9 @@ function AppContent({ fontsReady }: AppContentProps) {
 
   return (
     <>
-      <StatusBar style="dark" />
+      <StatusBar
+        style={sessionStatus === 'authenticated' ? 'light' : 'dark'}
+      />
       <RootNavigator />
     </>
   );
@@ -94,6 +99,14 @@ function AppContent({ fontsReady }: AppContentProps) {
 
 function RootNavigator() {
   const session = useAuthStore((state) => state.session);
+  const pharmacyName = usePharmacyStore((state) =>
+    state.status === 'ready' ? state.pharmacy.name : Pharmacy.defaultName,
+  );
+  const pharmacyBrandColor = usePharmacyStore((state) =>
+    state.status === 'ready'
+      ? state.pharmacy.brandColor
+      : Pharmacy.defaultBrandColor,
+  );
   const isAuthenticated = session.status === 'authenticated';
   const isUnauthenticated = session.status === 'unauthenticated';
 
@@ -106,7 +119,18 @@ function RootNavigator() {
     >
       <Stack.Screen name="index" />
       <Stack.Protected guard={isAuthenticated}>
-        <Stack.Screen name="(tabs)" />
+        <Stack.Screen
+          name="(tabs)"
+          options={{
+            headerShadowVisible: false,
+            headerShown: true,
+            headerStyle: { backgroundColor: pharmacyBrandColor },
+            headerTintColor: colors.text.inverse,
+            headerTitle: () => (
+              <PharmacyHeaderTitle name={pharmacyName} />
+            ),
+          }}
+        />
       </Stack.Protected>
       <Stack.Protected guard={isUnauthenticated}>
         <Stack.Screen name="login/index" />

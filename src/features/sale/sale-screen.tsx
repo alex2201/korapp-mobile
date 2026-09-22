@@ -10,18 +10,21 @@ import { styles } from './sale-screen.styles';
 
 export default function SaleScreen() {
   return (
-    <SafeAreaView edges={{ bottom: true }} style={styles.screen}>
-      <ScrollView
-        contentContainerStyle={styles.scrollViewContainer}
-        contentInsetAdjustmentBehavior="automatic"
-        style={styles.scrollView}
-      >
-        <View style={styles.content}>
-          <AppText selectable tone="brand" variant="display">
-            Punto de venta
-          </AppText>
-        </View>
-      </ScrollView>
+    <View style={ styles.screen }>
+    <SafeAreaView edges={{ bottom: true, top: true }}>
+      <View style={styles.mainContent}>
+        <ScrollView
+          contentContainerStyle={styles.scrollViewContainer}
+          contentInsetAdjustmentBehavior="automatic"
+          style={styles.scrollView}
+        >
+          <View style={styles.content}>
+            <AppText tone="brand" variant="display">
+              Productos
+            </AppText>
+          </View>
+        </ScrollView>
+      </View>
 
       <View style={styles.bottomAction}>
         <SearchProductButton />
@@ -29,5 +32,6 @@ export default function SaleScreen() {
         <ScanProductButton />
       </View>
     </SafeAreaView>
+    </ View>
   );
 }

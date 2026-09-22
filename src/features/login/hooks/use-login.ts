@@ -1,8 +1,8 @@
 import { validateEmail, validatePassword } from '@/features/auth/auth-validation';
-import { getFirebaseAuthErrorCode } from '@/features/auth/firebase-auth-errors';
-import { signInToFirebaseWithEmailAndPassword } from '@/features/auth/firebase-auth';
 import { useFormSubmission } from '@/features/auth/hooks/use-form-submission';
 import { useValidatedField } from '@/features/auth/hooks/use-validated-field';
+import { getFirebaseAuthErrorCode } from '@/services/firebase-auth/firebase-auth-errors';
+import { firebaseAuthRepository } from '@/services/firebase-auth/repositories/firebase-auth-repository';
 
 function getLoginErrorMessage(error: unknown) {
   switch (getFirebaseAuthErrorCode(error)) {
@@ -49,7 +49,7 @@ function createLoginActions({
     submission.start();
 
     try {
-      await signInToFirebaseWithEmailAndPassword(
+      await firebaseAuthRepository.signInWithEmailAndPassword(
         email.value.trim().toLowerCase(),
         password.value,
       );

@@ -1,5 +1,6 @@
-import { useAuthStore } from './auth-store';
-import type { AuthenticatedUser } from './auth-types';
+import { useAuthStore } from '@/stores/auth-store';
+
+import type { AuthenticatedUser } from '@/domain/models/authenticated-user';
 
 export function useAuthenticatedUser(): AuthenticatedUser {
   const session = useAuthStore((state) => state.session);

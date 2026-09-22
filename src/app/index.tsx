@@ -1,6 +1,6 @@
 import { Redirect } from 'expo-router';
 
-import { useAuthStore } from '@/features/auth/auth-store';
+import { useAuthStore } from '@/stores/auth-store';
 import { AppSplashScreen } from '@/features/splash/splash-screen';
 
 export default function IndexRoute() {

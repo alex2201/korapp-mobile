@@ -1,8 +1,8 @@
 import { ScrollView } from 'react-native';
 
 import { AppText, Button } from '@/components/ui';
+import { firebaseAuthRepository } from '@/services/firebase-auth/repositories/firebase-auth-repository';
 import { colors, spacing } from '@/theme';
-import { signOutFromFirebase } from '../auth/firebase-auth';
 
 export default function MoreScreen() {
   return (
@@ -19,7 +19,7 @@ export default function MoreScreen() {
       <AppText selectable tone="brand" variant="display">
         Más
       </AppText>
-      <Button onPress={signOutFromFirebase}>
+      <Button onPress={firebaseAuthRepository.signOut}>
         Cerrar sesión
       </Button>
     </ScrollView>

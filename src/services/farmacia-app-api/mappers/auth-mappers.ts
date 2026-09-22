@@ -1,5 +1,6 @@
-import type { VerifyTokenDataDto } from './auth-dtos';
-import type { AuthenticatedUser } from './auth-types';
+import type { AuthenticatedUser } from '@/domain/models/authenticated-user';
+
+import type { VerifyTokenDataDto } from '../dtos/auth-dtos';
 
 export function mapVerifyTokenDtoToAuthenticatedUser(
   dto: VerifyTokenDataDto,

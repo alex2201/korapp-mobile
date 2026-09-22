@@ -1,4 +1,4 @@
-import { getFirebaseAuthToken } from '@/features/auth/firebase-auth';
+import { firebaseAuthRepository } from '@/services/firebase-auth/repositories/firebase-auth-repository';
 
 import { HttpClient } from './http-client';
 
@@ -12,5 +12,5 @@ if (!apiUrl) {
 
 export const korappHttpClient = new HttpClient(
   apiUrl,
-  getFirebaseAuthToken,
+  () => firebaseAuthRepository.getToken(),
 );

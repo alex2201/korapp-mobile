@@ -75,6 +75,11 @@ export const textStyles = {
     fontSize: fontSizes.sm,
     lineHeight: fontSizes.sm * lineHeights.normal,
   },
+  labelLarge: {
+    fontFamily: fontFamilies.sans.bold,
+    fontSize: fontSizes.base,
+    lineHeight: fontSizes.base * lineHeights.normal,
+  },
   caption: {
     fontFamily: fontFamilies.sans.regular,
     fontSize: fontSizes.xs,
