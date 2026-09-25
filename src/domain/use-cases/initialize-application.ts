@@ -1,19 +1,26 @@
 import type { AuthenticatedUser } from '../models/authenticated-user';
 import type { Pharmacy } from '../models/pharmacy';
+import type { Service } from '../models/service';
 import type {
   AuthRepository,
   AuthSessionRepository,
   PharmacyRepository,
+  SchedulingRepository,
 } from '../repositories/application-repositories';
 
 type InitializeApplicationDependencies = {
   authRepository: AuthRepository;
   authSessionRepository: AuthSessionRepository;
   pharmacyRepository: PharmacyRepository;
+  schedulingRepository: SchedulingRepository;
 };
 
 type InitializeApplicationCallbacks = {
-  onAuthenticated: (user: AuthenticatedUser, pharmacy: Pharmacy) => void;
+  onAuthenticated: (
+    user: AuthenticatedUser,
+    pharmacy: Pharmacy,
+    services: Service[],
+  ) => void;
   onError: (error: unknown) => void;
   onInitializing: () => void;
   onUnauthenticated: () => void;
@@ -24,6 +31,7 @@ export function initializeApplication(
     authRepository,
     authSessionRepository,
     pharmacyRepository,
+    schedulingRepository,
   }: InitializeApplicationDependencies,
   {
     onAuthenticated,
@@ -56,9 +64,12 @@ export function initializeApplication(
         }
 
         const user = await authRepository.verifyToken();
-        const pharmacy = await pharmacyRepository.getInfo();
+        const [pharmacy, services] = await Promise.all([
+          pharmacyRepository.getInfo(),
+          schedulingRepository.listServices(),
+        ]);
 
-        if (isCurrent()) onAuthenticated(user, pharmacy);
+        if (isCurrent()) onAuthenticated(user, pharmacy, services);
       } catch (error) {
         if (isCurrent()) onError(error);
       }

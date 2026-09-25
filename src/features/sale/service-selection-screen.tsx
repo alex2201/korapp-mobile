@@ -1,5 +1,5 @@
 import { Stack, router } from 'expo-router';
-import { ActivityIndicator, FlatList, Pressable, View } from 'react-native';
+import { FlatList, Pressable, View } from 'react-native';
 
 import { AppText, Card } from '@/components/ui';
 import type { Service } from '@/domain/models/service';
@@ -11,8 +11,7 @@ import { useServiceSelection } from './hooks/use-service-selection';
 import { styles } from './service-selection-screen.styles';
 
 export default function ServiceSelectionScreen() {
-  const { error, isLoading, retry, selectService, services } =
-    useServiceSelection();
+  const { selectService, services } = useServiceSelection();
 
   return (
     <View style={styles.screen}>
@@ -41,13 +40,7 @@ export default function ServiceSelectionScreen() {
         contentInsetAdjustmentBehavior="automatic"
         data={services}
         keyExtractor={(service) => String(service.id)}
-        ListEmptyComponent={
-          <ServiceEmptyState
-            error={error}
-            isLoading={isLoading}
-            onRetry={retry}
-          />
-        }
+        ListEmptyComponent={<ServiceEmptyState />}
         ListHeaderComponent={
           <View style={styles.introduction}>
             <AppText variant="heading">Selecciona un servicio</AppText>
@@ -109,54 +102,14 @@ function ServiceListItem({
   );
 }
 
-function ServiceEmptyState({
-  error,
-  isLoading,
-  onRetry,
-}: {
-  error: string | null;
-  isLoading: boolean;
-  onRetry: () => void;
-}) {
+function ServiceEmptyState() {
   return (
     <Card padding="lg" style={styles.emptyState} variant="soft">
-      {isLoading ? (
-        <ActivityIndicator color={colors.brand.primary} size="large" />
-      ) : (
-        <ServiceIcon color={colors.brand.secondary} size={36} />
-      )}
-      <AppText variant="labelLarge">
-        {isLoading
-          ? 'Cargando servicios'
-          : error
-            ? 'No fue posible cargar los servicios'
-            : 'Sin servicios disponibles'}
+      <ServiceIcon color={colors.brand.secondary} size={36} />
+      <AppText variant="labelLarge">Sin servicios disponibles</AppText>
+      <AppText style={styles.emptyDescription} tone="muted">
+        No hay servicios activos con precio configurado.
       </AppText>
-      <AppText
-        selectable={Boolean(error)}
-        style={styles.emptyDescription}
-        tone={error ? 'error' : 'muted'}
-      >
-        {error ??
-          (isLoading
-            ? 'Espera un momento.'
-            : 'No hay servicios activos con precio configurado.')}
-      </AppText>
-      {error ? (
-        <Pressable
-          accessibilityLabel="Reintentar carga de servicios"
-          accessibilityRole="button"
-          onPress={onRetry}
-          style={({ pressed }) => [
-            styles.retryButton,
-            pressed ? styles.retryButtonPressed : null,
-          ]}
-        >
-          <AppText tone="inverse" variant="label">
-            Reintentar
-          </AppText>
-        </Pressable>
-      ) : null}
     </Card>
   );
 }

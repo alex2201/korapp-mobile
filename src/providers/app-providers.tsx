@@ -8,10 +8,12 @@ import {
 import { initializeApplication } from '@/domain/use-cases/initialize-application';
 import { authRepository } from '@/services/farmacia-app-api/repositories/auth-repository';
 import { pharmacyRepository } from '@/services/farmacia-app-api/repositories/pharmacy-repository';
+import { schedulingRepository } from '@/services/farmacia-app-api/repositories/scheduling-repository';
 import { firebaseAuthRepository } from '@/services/firebase-auth/repositories/firebase-auth-repository';
 import { useAuthStore } from '@/stores/auth-store';
 import { usePharmacyStore } from '@/stores/pharmacy-store';
 import { useSaleStore } from '@/stores/sale-store';
+import { useServiceStore } from '@/stores/service-store';
 
 export function AppProviders({ children }: PropsWithChildren) {
   const setAuthenticated = useAuthStore((state) => state.setAuthenticated);
@@ -22,6 +24,8 @@ export function AppProviders({ children }: PropsWithChildren) {
   const setPharmacyLoading = usePharmacyStore((state) => state.setLoading);
   const setPharmacy = usePharmacyStore((state) => state.setPharmacy);
   const resetSale = useSaleStore((state) => state.reset);
+  const resetServices = useServiceStore((state) => state.reset);
+  const setServices = useServiceStore((state) => state.setServices);
 
   useEffect(
     () =>
@@ -29,8 +33,10 @@ export function AppProviders({ children }: PropsWithChildren) {
         authRepository,
         authSessionRepository: firebaseAuthRepository,
         pharmacyRepository,
+        schedulingRepository,
       }, {
-        onAuthenticated: (user, pharmacy) => {
+        onAuthenticated: (user, pharmacy, services) => {
+          setServices(services);
           setPharmacy(pharmacy);
           setAuthenticated(user);
         },
@@ -38,6 +44,7 @@ export function AppProviders({ children }: PropsWithChildren) {
           console.error('Application initialization failed', error);
           setPharmacyError(error);
           resetSale();
+          resetServices();
           setUnauthenticated();
         },
         onInitializing: () => {
@@ -47,17 +54,20 @@ export function AppProviders({ children }: PropsWithChildren) {
         onUnauthenticated: () => {
           resetPharmacy();
           resetSale();
+          resetServices();
           setUnauthenticated();
         },
       }),
     [
       resetPharmacy,
       resetSale,
+      resetServices,
       setAuthenticated,
       setInitializing,
       setPharmacy,
       setPharmacyError,
       setPharmacyLoading,
+      setServices,
       setUnauthenticated,
     ],
   );

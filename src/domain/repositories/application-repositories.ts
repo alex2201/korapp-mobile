@@ -5,6 +5,7 @@ import type {
   ProductBarcodeSearchResult,
   ProductSearchResult,
 } from '../models/product';
+import type { Service } from '../models/service';
 
 export interface AuthRepository {
   verifyToken(): Promise<AuthenticatedUser>;
@@ -20,6 +21,10 @@ export interface PharmacyRepository {
   searchProductByBarcode(
     barcode: string,
   ): Promise<ProductBarcodeSearchResult>;
+}
+
+export interface SchedulingRepository {
+  listServices(): Promise<Service[]>;
 }
 
 export interface AuthIdentity {
