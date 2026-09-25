@@ -1,21 +1,25 @@
-import type { SaleCartItem } from '../models/sale-cart-item';
+import {
+  getSaleCartItemKey,
+  type SaleCartItem,
+} from '../models/sale-cart-item';
 
 type UpdateSaleCartItemQuantityInput = {
-  productPublicId: string;
+  itemKey: string;
   quantity: number;
 };
 
 export function updateSaleCartItemQuantity(
   cartItems: SaleCartItem[],
-  { productPublicId, quantity }: UpdateSaleCartItemQuantityInput,
+  { itemKey, quantity }: UpdateSaleCartItemQuantityInput,
 ): SaleCartItem[] {
   const item = cartItems.find(
-    (cartItem) => cartItem.product.publicId === productPublicId,
+    (cartItem) => getSaleCartItemKey(cartItem) === itemKey,
   );
 
   if (!item) return cartItems;
 
-  const maximumQuantity = Math.floor(item.product.currentStock);
+  const maximumQuantity =
+    item.kind === 'product' ? Math.floor(item.product.currentStock) : 99;
   const nextQuantity = Math.max(
     1,
     Math.min(Math.floor(quantity), maximumQuantity),
@@ -26,7 +30,7 @@ export function updateSaleCartItemQuantity(
   }
 
   return cartItems.map((cartItem) =>
-    cartItem.product.publicId === productPublicId
+    getSaleCartItemKey(cartItem) === itemKey
       ? { ...cartItem, quantity: nextQuantity }
       : cartItem,
   );

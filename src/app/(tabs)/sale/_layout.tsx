@@ -17,6 +17,17 @@ export default function SaleLayout() {
           title: 'Buscar producto',
         }}
       />
+      <Stack.Screen
+        name="service-selection"
+        options={{
+          contentStyle: { backgroundColor: colors.background.default },
+          headerBackButtonDisplayMode: 'minimal',
+          headerShown: true,
+          headerShadowVisible: false,
+          presentation: 'fullScreenModal',
+          title: 'Agregar servicio',
+        }}
+      />
     </Stack>
   );
 }

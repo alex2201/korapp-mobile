@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-screens/experimental';
 
 import { AppText } from '@/components/ui';
 import type { ProductBarcodeSearchResult } from '@/domain/models/product';
+import { getSaleCartItemKey } from '@/domain/models/sale-cart-item';
 import { getSaleCartSummary } from '@/domain/use-cases/get-sale-cart-summary';
 import { formatMxnCurrency } from '@/lib/currency';
 import { useSaleStore } from '@/stores/sale-store';
@@ -11,6 +12,7 @@ import { useSaleStore } from '@/stores/sale-store';
 import { AddServiceButton } from './components/add-service-button';
 import { ProductBarcodeScanner } from './components/product-barcode-scanner';
 import { SaleProductItem } from './components/sale-product-item';
+import { SaleServiceItem } from './components/sale-service-item';
 import { ScanProductButton } from './components/scan-product-button';
 import { SearchProductButton } from './components/search-product-button';
 import { styles } from './sale-screen.styles';
@@ -19,9 +21,9 @@ export default function SaleScreen() {
   const [isScannerVisible, setIsScannerVisible] = useState(false);
   const addProduct = useSaleStore((state) => state.addProduct);
   const cartItems = useSaleStore((state) => state.cartItems);
-  const removeProduct = useSaleStore((state) => state.removeProduct);
-  const setProductQuantity = useSaleStore(
-    (state) => state.setProductQuantity,
+  const removeItem = useSaleStore((state) => state.removeItem);
+  const setItemQuantity = useSaleStore(
+    (state) => state.setItemQuantity,
   );
   const cartSummary = useMemo(
     () => getSaleCartSummary(cartItems),
@@ -52,19 +54,31 @@ export default function SaleScreen() {
             <View style={styles.content}>
               {cartItems.length > 0 ? (
                 <View style={styles.productList}>
-                  {cartItems.map((item) => (
-                    <SaleProductItem
-                      key={item.product.publicId}
-                      onRemove={() =>
-                        removeProduct(item.product.publicId)
-                      }
-                      onSetQuantity={(quantity) =>
-                        setProductQuantity(item.product.publicId, quantity)
-                      }
-                      product={item.product}
-                      quantity={item.quantity}
-                    />
-                  ))}
+                  {cartItems.map((item) => {
+                    const itemKey = getSaleCartItemKey(item);
+
+                    return item.kind === 'product' ? (
+                      <SaleProductItem
+                        key={itemKey}
+                        onRemove={() => removeItem(itemKey)}
+                        onSetQuantity={(quantity) =>
+                          setItemQuantity(itemKey, quantity)
+                        }
+                        product={item.product}
+                        quantity={item.quantity}
+                      />
+                    ) : (
+                      <SaleServiceItem
+                        key={itemKey}
+                        onRemove={() => removeItem(itemKey)}
+                        onSetQuantity={(quantity) =>
+                          setItemQuantity(itemKey, quantity)
+                        }
+                        quantity={item.quantity}
+                        service={item.service}
+                      />
+                    );
+                  })}
                 </View>
               ) : (
                 <View style={styles.emptyState}>
@@ -85,30 +99,30 @@ export default function SaleScreen() {
           <View
             style={[
               styles.productCountBadge,
-              cartSummary.productCount === 0
+              cartSummary.itemCount === 0
                 ? styles.productCountBadgeEmpty
                 : null,
             ]}
           >
             <AppText
-              tone={cartSummary.productCount === 0 ? 'muted' : 'brand'}
+              tone={cartSummary.itemCount === 0 ? 'muted' : 'brand'}
               variant="labelLarge"
             >
-              {`${cartSummary.productCount} ${
-                cartSummary.productCount === 1 ? 'artículo' : 'artículos'
+              {`${cartSummary.itemCount} ${
+                cartSummary.itemCount === 1 ? 'artículo' : 'artículos'
               }`}
             </AppText>
           </View>
           <Pressable
             accessibilityLabel={`Cobrar ${formatMxnCurrency(cartSummary.total)}`}
             accessibilityRole="button"
-            accessibilityState={{ disabled: cartSummary.productCount === 0 }}
-            disabled={cartSummary.productCount === 0}
+            accessibilityState={{ disabled: cartSummary.itemCount === 0 }}
+            disabled={cartSummary.itemCount === 0}
             onPress={handleCheckout}
             style={({ pressed }) => [
               styles.checkoutButton,
               pressed ? styles.checkoutButtonPressed : null,
-              cartSummary.productCount === 0
+              cartSummary.itemCount === 0
                 ? styles.checkoutButtonDisabled
                 : null,
             ]}

@@ -9,21 +9,22 @@ export function addProductToSaleCart(
   if (product.currentStock < 1) return cartItems;
 
   const existingItem = cartItems.find(
-    (item) => item.product.publicId === product.publicId,
+    (item) =>
+      item.kind === 'product' && item.product.publicId === product.publicId,
   );
 
   if (!existingItem) {
-    return [...cartItems, { product, quantity: 1 }];
+    return [...cartItems, { kind: 'product', product, quantity: 1 }];
   }
 
   const cartItemsWithCurrentProduct = cartItems.map((item) =>
-    item.product.publicId === product.publicId
+    item.kind === 'product' && item.product.publicId === product.publicId
       ? { ...item, product }
       : item,
   );
 
   return updateSaleCartItemQuantity(cartItemsWithCurrentProduct, {
-    productPublicId: product.publicId,
+    itemKey: `product-${product.publicId}`,
     quantity: existingItem.quantity + 1,
   });
 }

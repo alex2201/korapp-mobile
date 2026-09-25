@@ -1,7 +1,7 @@
 import type { SaleCartItem } from '../models/sale-cart-item';
 
 export type SaleCartSummary = {
-  productCount: number;
+  itemCount: number;
   total: number;
 };
 
@@ -10,15 +10,17 @@ export function getSaleCartSummary(
 ): SaleCartSummary {
   return cartItems.reduce<SaleCartSummary>(
     (summary, item) => {
-      const unitPrice = Number(item.product.currentPrice ?? 0);
+      const unitPrice = Number(
+        item.kind === 'product' ? item.product.currentPrice ?? 0 : item.service.price,
+      );
 
       return {
-        productCount: summary.productCount + item.quantity,
+        itemCount: summary.itemCount + item.quantity,
         total:
           summary.total +
           (Number.isFinite(unitPrice) ? unitPrice * item.quantity : 0),
       };
     },
-    { productCount: 0, total: 0 },
+    { itemCount: 0, total: 0 },
   );
 }
