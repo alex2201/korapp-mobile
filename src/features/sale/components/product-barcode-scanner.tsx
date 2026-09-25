@@ -76,11 +76,25 @@ export function ProductBarcodeScanner({
           : error instanceof Error
             ? error.message
             : 'Ocurrió un error inesperado. Intenta nuevamente.',
+        [
+          {
+            onPress: handleClose,
+            style: 'cancel',
+            text: 'Cerrar escáner',
+          },
+          {
+            onPress: resumeScanning,
+            text: 'Intentar de nuevo',
+          },
+        ],
+        { cancelable: false },
       );
-
-      isProcessingRef.current = false;
-      setIsProcessing(false);
     }
+  }
+
+  function resumeScanning() {
+    isProcessingRef.current = false;
+    setIsProcessing(false);
   }
 
   function handleClose() {
