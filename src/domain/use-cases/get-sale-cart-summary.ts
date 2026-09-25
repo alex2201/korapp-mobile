@@ -15,7 +15,7 @@ export function getSaleCartSummary(
       );
 
       return {
-        itemCount: summary.itemCount + item.quantity,
+        itemCount: summary.itemCount + 1,
         total:
           summary.total +
           (Number.isFinite(unitPrice) ? unitPrice * item.quantity : 0),

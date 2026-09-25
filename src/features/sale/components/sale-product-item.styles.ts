@@ -6,6 +6,9 @@ export const styles = StyleSheet.create({
   card: {
     width: '100%',
   },
+  cardInvalid: {
+    borderColor: colors.status.error,
+  },
   itemLayout: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -26,6 +29,36 @@ export const styles = StyleSheet.create({
   quantityControls: {
     flexDirection: 'row',
     gap: spacing.sm,
+  },
+  fractionalQuantitySection: {
+    alignItems: 'center',
+    alignSelf: 'stretch',
+    gap: spacing.sm,
+  },
+  fractionalQuantityControl: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  fractionalStepControls: {
+    flexDirection: 'row',
+    gap: spacing['2xl'],
+    justifyContent: 'center',
+  },
+  fractionalQuantityInput: {
+    backgroundColor: colors.background.default,
+    borderColor: colors.border.default,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    color: colors.text.primary,
+    fontVariant: ['tabular-nums'],
+    minWidth: 72,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+    textAlign: 'right',
+  },
+  fractionalQuantityInputInvalid: {
+    borderColor: colors.status.error,
   },
   quantityButton: {
     alignItems: 'center',

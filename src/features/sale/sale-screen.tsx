@@ -6,10 +6,13 @@ import { AppText } from '@/components/ui';
 import type { ProductBarcodeSearchResult } from '@/domain/models/product';
 import { getSaleCartItemKey } from '@/domain/models/sale-cart-item';
 import { getSaleCartSummary } from '@/domain/use-cases/get-sale-cart-summary';
+import { validateSaleCartForCheckout } from '@/domain/use-cases/validate-sale-cart-for-checkout';
 import { formatMxnCurrency } from '@/lib/currency';
 import { useSaleStore } from '@/stores/sale-store';
+import { colors } from '@/theme';
 
 import { AddServiceButton } from './components/add-service-button';
+import { CheckoutAlertIcon } from './components/checkout-alert-icon';
 import { ProductBarcodeScanner } from './components/product-barcode-scanner';
 import { SaleProductItem } from './components/sale-product-item';
 import { SaleServiceItem } from './components/sale-service-item';
@@ -27,6 +30,10 @@ export default function SaleScreen() {
   );
   const cartSummary = useMemo(
     () => getSaleCartSummary(cartItems),
+    [cartItems],
+  );
+  const cartValidation = useMemo(
+    () => validateSaleCartForCheckout(cartItems),
     [cartItems],
   );
 
@@ -95,42 +102,64 @@ export default function SaleScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.checkoutSummary}>
-          <View
-            style={[
-              styles.productCountBadge,
-              cartSummary.itemCount === 0
-                ? styles.productCountBadgeEmpty
-                : null,
-            ]}
-          >
-            <AppText
-              tone={cartSummary.itemCount === 0 ? 'muted' : 'brand'}
-              variant="labelLarge"
+        <View style={styles.checkoutSection}>
+          {cartSummary.itemCount > 0 && !cartValidation.isValid ? (
+            <View
+              accessibilityLiveRegion="polite"
+              accessibilityRole="alert"
+              style={styles.checkoutAlert}
             >
-              {`${cartSummary.itemCount} ${
-                cartSummary.itemCount === 1 ? 'artículo' : 'artículos'
-              }`}
-            </AppText>
+              <CheckoutAlertIcon
+                color={colors.statusSurface.warning.text}
+                size={16}
+              />
+              <AppText style={styles.checkoutAlertText} variant="caption">
+                {cartValidation.reason}
+              </AppText>
+            </View>
+          ) : null}
+          <View style={styles.checkoutSummary}>
+            <View
+              style={[
+                styles.productCountBadge,
+                cartSummary.itemCount === 0
+                  ? styles.productCountBadgeEmpty
+                  : null,
+              ]}
+            >
+              <AppText
+                tone={cartSummary.itemCount === 0 ? 'muted' : 'brand'}
+                variant="labelLarge"
+              >
+                {`${cartSummary.itemCount} ${cartSummary.itemCount === 1 ? 'artículo' : 'artículos'
+                  }`}
+              </AppText>
+            </View>
+            <View style={styles.checkoutAction}>
+              <Pressable
+                accessibilityLabel={
+                  cartValidation.isValid
+                    ? `Cobrar ${formatMxnCurrency(cartSummary.total)}`
+                    : `Cobro no disponible. ${cartValidation.reason ?? ''}`
+                }
+                accessibilityRole="button"
+                accessibilityState={{ disabled: !cartValidation.isValid }}
+                disabled={!cartValidation.isValid}
+                onPress={handleCheckout}
+                style={({ pressed }) => [
+                  styles.checkoutButton,
+                  pressed ? styles.checkoutButtonPressed : null,
+                  !cartValidation.isValid
+                    ? styles.checkoutButtonDisabled
+                    : null,
+                ]}
+              >
+                <AppText tone="inverse" variant="labelLarge">
+                  {`Cobrar · ${formatMxnCurrency(cartSummary.total)}`}
+                </AppText>
+              </Pressable>
+            </View>
           </View>
-          <Pressable
-            accessibilityLabel={`Cobrar ${formatMxnCurrency(cartSummary.total)}`}
-            accessibilityRole="button"
-            accessibilityState={{ disabled: cartSummary.itemCount === 0 }}
-            disabled={cartSummary.itemCount === 0}
-            onPress={handleCheckout}
-            style={({ pressed }) => [
-              styles.checkoutButton,
-              pressed ? styles.checkoutButtonPressed : null,
-              cartSummary.itemCount === 0
-                ? styles.checkoutButtonDisabled
-                : null,
-            ]}
-          >
-            <AppText tone="inverse" variant="labelLarge">
-              {`Cobrar · ${formatMxnCurrency(cartSummary.total)}`}
-            </AppText>
-          </Pressable>
         </View>
 
         <View style={styles.bottomAction}>

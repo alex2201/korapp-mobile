@@ -1,12 +1,17 @@
 import type { ProductBarcodeSearchResult } from '../models/product';
 import type { SaleCartItem } from '../models/sale-cart-item';
+import { isFractionalProductUnit } from '../../lib/product-units';
 import { updateSaleCartItemQuantity } from './update-sale-cart-item-quantity';
 
 export function addProductToSaleCart(
   cartItems: SaleCartItem[],
   product: ProductBarcodeSearchResult,
 ): SaleCartItem[] {
-  if (product.currentStock < 1) return cartItems;
+  const isFractional = isFractionalProductUnit(product.unit);
+
+  if (product.currentStock <= 0 || (!isFractional && product.currentStock < 1)) {
+    return cartItems;
+  }
 
   const existingItem = cartItems.find(
     (item) =>
@@ -14,7 +19,10 @@ export function addProductToSaleCart(
   );
 
   if (!existingItem) {
-    return [...cartItems, { kind: 'product', product, quantity: 1 }];
+    return [
+      ...cartItems,
+      { kind: 'product', product, quantity: isFractional ? 0 : 1 },
+    ];
   }
 
   const cartItemsWithCurrentProduct = cartItems.map((item) =>
@@ -22,6 +30,8 @@ export function addProductToSaleCart(
       ? { ...item, product }
       : item,
   );
+
+  if (isFractional) return cartItemsWithCurrentProduct;
 
   return updateSaleCartItemQuantity(cartItemsWithCurrentProduct, {
     itemKey: `product-${product.publicId}`,
