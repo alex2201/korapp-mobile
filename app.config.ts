@@ -43,7 +43,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ios: {
       ...config.ios,
       bundleIdentifier: variant.iosBundleIdentifier,
-      googleServicesFile: `${variant.firebaseDirectory}/GoogleService-Info.plist`,
+      googleServicesFile:
+        process.env.GOOGLE_SERVICES_IOS ??
+        `${variant.firebaseDirectory}/GoogleService-Info.plist`,
       infoPlist: {
         ...config.ios?.infoPlist,
         NSCameraUsageDescription:

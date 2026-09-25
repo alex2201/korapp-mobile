@@ -8,7 +8,13 @@
     "scheme": "korapp-qa",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.appsmx.korapp.qa",
+      "googleServicesFile": "./firebase/qa/GoogleService-Info.plist",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Korapp usa la cámara para escanear códigos de barras de productos.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -55,6 +61,14 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "appVariant": "qa",
+      "router": {},
+      "eas": {
+        "projectId": "758d58a1-99a7-4446-ba6a-66fa9fbe59b5"
+      }
+    },
+    "owner": "lonelydeadman"
   }
 }

@@ -1,0 +1,19 @@
+{
+  "cli": {
+    "version": ">= 19.1.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "qa": {
+      "distribution": "internal",
+      "environment": "preview",
+      "env": {
+        "APP_VARIANT": "qa"
+      },
+      "ios": {
+        "image": "latest",
+        "autoIncrement": true
+      }
+    }
+  }
+}

@@ -1,0 +1,139 @@
+name: Distribute iOS QA
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_notes:
+        description: Notes shown to Firebase testers
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: ios-qa-distribution
+  cancel-in-progress: false
+
+jobs:
+  build-and-distribute:
+    name: Build and distribute iOS QA
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run TypeScript checks
+        run: npm run typecheck
+
+      - name: Set up Expo and EAS
+        uses: expo/expo-github-action@v9
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build iOS application with EAS
+        id: eas-build
+        run: |
+          eas build \
+            --platform ios \
+            --profile qa \
+            --non-interactive \
+            --wait \
+            --json > eas-build.json
+
+          build_url="$(jq -r '.[0].artifacts.buildUrl // empty' eas-build.json)"
+
+          if [ -z "$build_url" ]; then
+            echo "EAS did not return an IPA download URL."
+            exit 1
+          fi
+
+          echo "build_url=$build_url" >> "$GITHUB_OUTPUT"
+
+      - name: Download IPA
+        run: |
+          curl \
+            --fail \
+            --location \
+            --retry 3 \
+            "${{ steps.eas-build.outputs.build_url }}" \
+            --output korapp-qa.ipa
+
+      - name: Prepare Firebase credentials
+        env:
+          FIREBASE_SERVICE_ACCOUNT_BASE64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BASE64 }}
+        run: |
+          credentials_path="$RUNNER_TEMP/firebase-service-account.json"
+
+          umask 077
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT_BASE64" |
+            base64 --decode > "$credentials_path"
+
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$credentials_path" >> "$GITHUB_ENV"
+
+      - name: Prepare release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MANUAL_NOTES: ${{ inputs.release_notes }}
+        run: |
+          previous_sha="$(
+            gh run list \
+              --workflow distribute-ios-qa.yml \
+              --branch "$GITHUB_REF_NAME" \
+              --status success \
+              --limit 1 \
+              --json headSha \
+              --jq '.[0].headSha // empty'
+          )"
+
+          if [ -n "$previous_sha" ] &&
+             git merge-base --is-ancestor "$previous_sha" "$GITHUB_SHA"; then
+            git log "$previous_sha..$GITHUB_SHA" \
+              --pretty=format:'- %s (%h)' > commit-notes.txt
+          else
+            git log -1 --pretty=format:'- %s (%h)' > commit-notes.txt
+          fi
+
+          if [ ! -s commit-notes.txt ]; then
+            printf '%s\n' '- Sin commits nuevos desde la distribución anterior.' \
+              > commit-notes.txt
+          fi
+
+          {
+            if [ -n "$MANUAL_NOTES" ]; then
+              printf '%s\n\n' "$MANUAL_NOTES"
+            fi
+
+            printf 'Cambios incluidos:\n\n'
+            cat commit-notes.txt
+            printf '\n'
+          } > release-notes.txt
+
+      - name: Distribute through Firebase
+        env:
+          FIREBASE_IOS_APP_ID: ${{ vars.FIREBASE_IOS_APP_ID }}
+          FIREBASE_TESTER_GROUP: ${{ vars.FIREBASE_TESTER_GROUP }}
+        run: |
+          npx --yes firebase-tools@latest \
+            appdistribution:distribute korapp-qa.ipa \
+            --app "$FIREBASE_IOS_APP_ID" \
+            --groups "$FIREBASE_TESTER_GROUP" \
+            --release-notes-file release-notes.txt
