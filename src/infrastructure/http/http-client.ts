@@ -11,6 +11,7 @@ const apiErrorResponseSchema = z.object({
 });
 
 type AccessTokenProvider = () => Promise<string | null>;
+type HttpQueryValue = boolean | number | string | null | undefined;
 
 type HttpRequestOptions = Omit<
   RequestInit,
@@ -18,6 +19,7 @@ type HttpRequestOptions = Omit<
 > & {
   authenticated?: boolean;
   headers?: HeadersInit;
+  query?: Record<string, HttpQueryValue>;
 };
 
 export class HttpClient {
@@ -83,6 +85,7 @@ export class HttpClient {
     const {
       authenticated = true,
       headers: customHeaders,
+      query,
       ...requestOptions
     } = options;
     const headers = new Headers(customHeaders);
@@ -110,7 +113,7 @@ export class HttpClient {
     let response: Response;
 
     try {
-      response = await fetch(this.buildUrl(path), {
+      response = await fetch(this.buildUrl(path, query), {
         ...requestOptions,
         method,
         headers,
@@ -160,9 +163,20 @@ export class HttpClient {
     return parsedResponse.data;
   }
 
-  private buildUrl(path: string): string {
-    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-    return `${this.baseUrl}${normalizedPath}`;
+  private buildUrl(
+    path: string,
+    query?: Record<string, HttpQueryValue>,
+  ): string {
+    const relativePath = path.replace(/^\/+/, '');
+    const url = new URL(relativePath, `${this.baseUrl}/`);
+
+    Object.entries(query ?? {}).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        url.searchParams.set(key, String(value));
+      }
+    });
+
+    return url.toString();
   }
 
   private async readResponseBody(response: Response): Promise<unknown> {
