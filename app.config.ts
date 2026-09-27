@@ -55,7 +55,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     android: {
       ...config.android,
       package: variant.androidPackage,
-      googleServicesFile: `${variant.firebaseDirectory}/google-services.json`,
+      googleServicesFile:
+        process.env.GOOGLE_SERVICES_ANDROID ??
+        `${variant.firebaseDirectory}/google-services.json`,
       permissions: Array.from(
         new Set([
           ...(config.android?.permissions ?? []),
