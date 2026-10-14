@@ -82,10 +82,60 @@ export class HttpClient {
     payload: unknown,
     options: HttpRequestOptions,
   ): Promise<T> {
+    const startedAt = Date.now();
+    const requestSource = new Error('HTTP request initiated here').stack;
+    let url = path;
+
+    try {
+      url = this.buildUrl(path, options.query);
+      return await this.performRequest(method, url, schema, payload, options);
+    } catch (error) {
+      const status = error instanceof ApiError && error.status > 0
+        ? String(error.status)
+        : 'Sin respuesta HTTP';
+      const code = error instanceof ApiError ? error.code : undefined;
+      const message = error instanceof Error ? error.message : String(error);
+      const durationMs = Date.now() - startedAt;
+
+      console.group(`[HTTP ERROR] ${method} · ${status} · ${durationMs} ms`);
+      try {
+        console.error(message);
+        console.log(`URL: ${url}`);
+        if (code) console.log(`Código: ${code}`);
+
+        if (error instanceof ApiError && error.details !== undefined) {
+          console.log('Detalles:', error.details);
+        }
+        if (error instanceof ApiError && error.cause !== undefined) {
+          console.log('Causa original:', error.cause);
+        }
+
+        console.groupCollapsed('Origen de la solicitud');
+        console.log(requestSource ?? 'Pila de llamadas no disponible');
+        console.groupEnd();
+
+        console.groupCollapsed('Error completo');
+        console.log(error);
+        console.groupEnd();
+      } finally {
+        console.groupEnd();
+      }
+
+      throw error;
+    }
+  }
+
+  private async performRequest<T>(
+    method: 'DELETE' | 'GET' | 'PATCH' | 'POST' | 'PUT',
+    url: string,
+    schema: z.ZodType<T>,
+    payload: unknown,
+    options: HttpRequestOptions,
+  ): Promise<T> {
     const {
       authenticated = true,
       headers: customHeaders,
-      query,
+      query: _query,
       ...requestOptions
     } = options;
     const headers = new Headers(customHeaders);
@@ -113,17 +163,19 @@ export class HttpClient {
     let response: Response;
 
     try {
-      response = await fetch(this.buildUrl(path, query), {
+      response = await fetch(url, {
         ...requestOptions,
         method,
         headers,
         body: payload === undefined ? undefined : JSON.stringify(payload),
       });
-    } catch {
+    } catch (cause) {
       throw new ApiError(
         'No fue posible conectarse con el servidor',
         0,
         'NETWORK_ERROR',
+        undefined,
+        cause,
       );
     }
 
@@ -150,8 +202,6 @@ export class HttpClient {
     const parsedResponse = schema.safeParse(responseBody);
 
     if (!parsedResponse.success) {
-      console.error('Invalid API response', parsedResponse.error);
-
       throw new ApiError(
         'El servidor respondió con datos inesperados',
         response.status,
